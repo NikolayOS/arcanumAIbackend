@@ -5,6 +5,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+const PORT = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -286,6 +287,6 @@ app.post('/', async (req, res) => {
 	res.send({ message: response.choices[0].message, threeCards });
 });
 
-app.listen(3000, () => {
+app.listen(PORT, () => {
 	console.log('Server is running on http://localhost:3000');
 });
