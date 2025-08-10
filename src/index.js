@@ -11,6 +11,7 @@ const allowedOrigins = ['https://arcanum-ai.vercel.app', 'http://localhost:5173'
 const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename); // для дев версии
 const __dirname = path.resolve();
+const cardsPath = path.join(__dirname, 'cards');
 
 const tarotDeck = [
 	{
