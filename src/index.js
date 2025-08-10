@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const PORT = process.env.PORT || 3000;
 const allowedOrigins = ['https://arcanum-ai.vercel.app', 'http://localhost:5173'];
@@ -295,6 +296,14 @@ app.post('/', async (req, res) => {
 		],
 	});
 	res.send({ message: response.choices[0].message, threeCards });
+});
+
+fs.readdir(cardsPath, (err, files) => {
+	if (err) {
+		console.error('Ошибка чтения папки cards:', err);
+	} else {
+		console.log('Файлы в папке cards:', files);
+	}
 });
 
 app.listen(PORT, () => {
