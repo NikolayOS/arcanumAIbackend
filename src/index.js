@@ -8,7 +8,8 @@ import { fileURLToPath } from 'url';
 const PORT = process.env.PORT || 3000;
 const allowedOrigins = ['https://arcanum-ai.vercel.app', 'http://localhost:5173'];
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __dirname = path.dirname(__filename); // для дев версии
+const __dirname = path.resolve();
 
 const tarotDeck = [
 	{
@@ -272,7 +273,8 @@ app.use(
 	}),
 );
 // отдаем статические файлы с картами
-app.use('/cards', express.static(path.join(__dirname, 'cards')));
+// app.use('/cards', express.static(path.join(__dirname, 'cards')));
+app.use('/cards', express.static(path.join(__dirname, 'src', 'cards')));
 
 // получаем запрос от фронта с вопросом и сразу отдаем на нейронку
 app.post('/', async (req, res) => {
