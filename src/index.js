@@ -272,7 +272,7 @@ app.use(
 	}),
 );
 // отдаем статические файлы с картами
-app.use('/cardes', express.static(path.join(__dirname, 'assets', 'cards')));
+app.use('/cardes', express.static(path.join(__dirname, 'cards')));
 
 // получаем запрос от фронта с вопросом и сразу отдаем на нейронку
 app.post('/', async (req, res) => {
