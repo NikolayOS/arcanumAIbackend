@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const PORT = process.env.PORT || 3000;
+const allowedOrigins = ['https://arcanum-ai.vercel.app', 'http://localhost:5173'];
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -259,7 +260,14 @@ app.use(express.json());
 // разрешаем CORS для фронтенда
 app.use(
 	cors({
-		origin: 'http://localhost:5173',
+		origin: (origin, callback) => {
+			// Разрешаем запросы без origin (например, Postman) или из списка
+			if (!origin || allowedOrigins.includes(origin)) {
+				callback(null, true);
+			} else {
+				callback(new Error('Not allowed by CORS'));
+			}
+		},
 		credentials: true,
 	}),
 );
