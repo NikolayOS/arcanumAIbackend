@@ -239,7 +239,7 @@ let threeCards = [];
 let threeCardsNames = '';
 
 const imagePath = (name) => {
-	return path.join(__dirname, 'assets', 'cards', `${name}.jpg`);
+	return path.join(__dirname, 'cards', `${name}.jpg`);
 };
 // const imagePath = path.join(__dirname, 'src','assets','cards', `${}.jpg`);
 // .map((card) => (card.img = path.join(__dirname, 'src', 'assets', 'cards', `${card.img}.jpg`)));
@@ -272,7 +272,7 @@ app.use(
 	}),
 );
 // отдаем статические файлы с картами
-app.use('/cardes', express.static(path.join(__dirname, 'cards')));
+app.use('/cards', express.static(path.join(__dirname, 'cards')));
 
 // получаем запрос от фронта с вопросом и сразу отдаем на нейронку
 app.post('/', async (req, res) => {
