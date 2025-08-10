@@ -2,16 +2,10 @@ import 'dotenv/config';
 import OpenAI from 'openai';
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
 
 const PORT = process.env.PORT || 3000;
 const allowedOrigins = ['https://arcanum-ai.vercel.app', 'http://localhost:5173'];
 const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename); // для дев версии
-const __dirname = path.resolve();
-const cardsPath = path.join(__dirname, 'cards');
 
 const tarotDeck = [
 	{
@@ -241,11 +235,6 @@ const tarotDeck = [
 let threeCards = [];
 let threeCardsNames = '';
 
-const imagePath = (name) => {
-	return path.join(__dirname, 'cards', `${name}.jpg`);
-};
-// const imagePath = path.join(__dirname, 'src','assets','cards', `${}.jpg`);
-// .map((card) => (card.img = path.join(__dirname, 'src', 'assets', 'cards', `${card.img}.jpg`)));
 function shuffled() {
 	const shuffledArr = tarotDeck.sort(() => Math.random() - 0.5);
 	threeCards = shuffledArr.slice(0, 3);
@@ -274,9 +263,6 @@ app.use(
 		credentials: true,
 	}),
 );
-// отдаем статические файлы с картами
-// app.use('/cards', express.static(path.join(__dirname, 'cards')));
-app.use('/cards', express.static(path.join(__dirname, 'src', 'cards')));
 
 // получаем запрос от фронта с вопросом и сразу отдаем на нейронку
 app.post('/', async (req, res) => {
@@ -297,14 +283,6 @@ app.post('/', async (req, res) => {
 		],
 	});
 	res.send({ message: response.choices[0].message, threeCards });
-});
-
-fs.readdir(cardsPath, (err, files) => {
-	if (err) {
-		console.error('Ошибка чтения папки cards:', err);
-	} else {
-		console.log('Файлы в папке cards:', files);
-	}
 });
 
 app.listen(PORT, () => {
