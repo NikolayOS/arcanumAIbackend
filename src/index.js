@@ -2,9 +2,10 @@ import 'dotenv/config';
 import OpenAI from 'openai';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
 
 const PORT = process.env.PORT || 3000;
-const allowedOrigins = ['https://arcanum-ai.vercel.app', 'http://localhost:5173'];
 
 const tarotDeck = [
 	{
@@ -234,6 +235,11 @@ const tarotDeck = [
 let threeCards = [];
 let threeCardsNames = '';
 
+const users = [
+	{ login: 'test', password: '111111', email: 'test@gmail.com' },
+	{ login: 'test2', password: '222222', email: 'test2@gmail.com' },
+];
+
 function shuffled() {
 	const shuffledArr = tarotDeck.sort(() => Math.random() - 0.5);
 	threeCards = shuffledArr.slice(0, 3);
@@ -253,7 +259,7 @@ app.use(
 	cors({
 		origin: (origin, callback) => {
 			// Разрешаем запросы без origin (например, Postman) или из списка
-			if (!origin || allowedOrigins.includes(origin)) {
+			if (!origin || process.env.CORS_ORIGIN.includes(origin)) {
 				callback(null, true);
 			} else {
 				callback(new Error('Not allowed by CORS'));
@@ -272,7 +278,7 @@ app.post('/', async (req, res) => {
 	});
 
 	const response = await openai.chat.completions.create({
-		model: 'gemini-2.0-flash',
+		model: 'gemini-2.5-flash',
 		messages: [
 			{ role: 'system', content: 'You are a helpful assistant.' },
 			{
@@ -284,6 +290,21 @@ app.post('/', async (req, res) => {
 	res.send({ message: response.choices[0].message, threeCards });
 });
 
-app.listen(PORT, () => {
-	console.log('Server is running on http://localhost:3000');
+app.post('/register', (req, res) => {
+	console.log(req.body);
+	res.send({ message: 'Registration successful' });
 });
+app.post('/login', (req, res) => {
+	console.log(req.body);
+	res.send({ message: 'Login successful' });
+});
+
+const startServer = async () => {
+	try {
+		app.listen(PORT);
+		console.log(`Server is running on http://localhost:${PORT}`);
+	} catch (error) {
+		console.error('Error starting server:', error);
+	}
+};
+startServer();
