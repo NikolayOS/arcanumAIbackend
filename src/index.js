@@ -2,8 +2,10 @@ import 'dotenv/config';
 import OpenAI from 'openai';
 import express from 'express';
 import cors from 'cors';
-import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
+import User from './models/User.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const PORT = process.env.PORT || 3000;
 
@@ -235,11 +237,6 @@ const tarotDeck = [
 let threeCards = [];
 let threeCardsNames = '';
 
-const users = [
-	{ login: 'test', password: '111111', email: 'test@gmail.com' },
-	{ login: 'test2', password: '222222', email: 'test2@gmail.com' },
-];
-
 function shuffled() {
 	const shuffledArr = tarotDeck.sort(() => Math.random() - 0.5);
 	threeCards = shuffledArr.slice(0, 3);
@@ -290,13 +287,55 @@ app.post('/', async (req, res) => {
 	res.send({ message: response.choices[0].message, threeCards });
 });
 
-app.post('/register', (req, res) => {
-	console.log(req.body);
-	res.send({ message: 'Registration successful' });
+// подключаемся к монго и запускаем сервер
+mongoose
+	.connect(process.env.DB_URL)
+	.then(() => {
+		console.log('Connected to MongoDB');
+	})
+	.catch((err) => {
+		console.error('MongoDB connection error:', err);
+	});
+app.post('/register', async (req, res) => {
+	try {
+		const existingUser = await User.findOne({ email: req.body.email } || { login: req.body.login });
+		if (existingUser) {
+			if (existingUser.login === req.body.login) {
+				return res.status(400).send({ message: 'Login is already to use' });
+			} else {
+				return res.status(400).send({ message: 'Email is already to use' });
+			}
+		}
+		const saltRounds = 10; // количество раундов для генерации соли
+		const hashedPassword = await bcrypt.hash(req.body.password, saltRounds); // хэшируем пароль
+		const user = new User({ ...req.body, password: hashedPassword }); // данные с фронта
+		await user.save(); // сохраняем в базу
+		res.status(200).send({ message: 'Registration successful' });
+	} catch (err) {
+		return res.status(500).send({ message: 'Server error' });
+	}
 });
-app.post('/login', (req, res) => {
-	console.log(req.body);
-	res.send({ message: 'Login successful' });
+app.post('/login', async (req, res) => {
+	try {
+		const existingUser = await User.findOne({ login: req.body.login });
+		if (existingUser) {
+			const { password, ...existingUserWithoutPassword } = existingUser.toObject();
+			if (bcrypt.compareSync(req.body.password, existingUser.password)) {
+				const token = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET, {
+					expiresIn: process.env.JWT_EXPIRES_IN,
+				});
+				return res
+					.status(200)
+					.json({ message: 'Login successful', existingUserWithoutPassword, token });
+			} else {
+				return res.status(400).send({ message: 'Invalid login or password' });
+			}
+		} else {
+			return res.status(400).send({ message: 'Invalid login or password' });
+		}
+	} catch (err) {
+		return res.status(500).send({ message: 'Server error' });
+	}
 });
 
 const startServer = async () => {
