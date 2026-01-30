@@ -289,7 +289,7 @@ app.post('/', async (req, res) => {
 
 // подключаемся к монго и запускаем сервер
 mongoose
-	.connect(process.env.DB_URL)
+	.connect(process.env.DB_URL.toString())
 	.then(() => {
 		console.log('Connected to MongoDB');
 	})
