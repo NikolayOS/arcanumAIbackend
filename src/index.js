@@ -298,7 +298,9 @@ mongoose
 	});
 app.post('/register', async (req, res) => {
 	try {
-		const existingUser = await User.findOne({ email: req.body.email } || { login: req.body.login });
+		const existingUser = await User.findOne({
+			$or: [{ email: req.body.email }, { login: req.body.login }],
+		});
 		if (existingUser) {
 			if (existingUser.login === req.body.login) {
 				return res.status(400).send({ message: 'Login is already to use' });
@@ -309,8 +311,9 @@ app.post('/register', async (req, res) => {
 		const saltRounds = 10; // количество раундов для генерации соли
 		const hashedPassword = await bcrypt.hash(req.body.password, saltRounds); // хэшируем пароль
 		const user = new User({ ...req.body, password: hashedPassword }); // данные с фронта
+		console.log(user);
 		await user.save(); // сохраняем в базу
-		res.status(200).send({ message: 'Registration successful' });
+		return res.status(200).send({ message: 'Registration successful' });
 	} catch (err) {
 		return res.status(500).send({ message: 'Server error' });
 	}
